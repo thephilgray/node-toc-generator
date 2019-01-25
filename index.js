@@ -35,6 +35,7 @@ async function getAllTagsFromFile(filename, pageNumber) {
 
 /* TODO: Do not hardcode `src` */
 /* TODO: only get HTML files */
+
 async function buildMap() {
   const files = await asyncReaddir('src');
   const allPromises = files.map(async (file, i) => {
