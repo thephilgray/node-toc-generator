@@ -1,0 +1,16 @@
+h1 {
+  text-align: center;
+}
+
+.toc {
+  max-width: 30em;
+  margin: 0 auto;
+}
+
+.toc__level-2 {
+  text-indent: 1em;
+}
+
+.toc__page {
+  float: right;
+}
