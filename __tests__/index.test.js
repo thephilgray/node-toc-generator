@@ -1,5 +1,6 @@
 const path = require('path');
 const getFilePaths = require('../lib/getFilePaths.js');
+const getElementsFromFile = require('../lib/getElementsFromFile.js');
 
 // 1.
 describe('getFilePaths', () => {
@@ -39,10 +40,24 @@ describe('getFilePaths', () => {
 });
 
 // 2.
-// accepts a filename/filepath and an array of element tagnames
-// returns a map of all the elements for each tagname
-// should thow an error if any of the tagnames have the same id
-// should return an array of objects for each of the elements
+describe('getElementsFromFile', () => {
+  // accepts a filename/filepath to an html file and an array of element tagnames
+  it('accepts a filename/filepath to an html file and an array of element tagnames and returns an array of elements', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', 'page002.html');
+    const tagnames = ['h1', 'h2', 'h3'];
+    const actual = await getElementsFromFile(htmlFile, tagnames);
+
+    const getInstanceNames = HTMLElementsArray =>
+      HTMLElementsArray.map(el => el.constructor.name);
+    const expected = ['HTMLHeadingElement'];
+    // should be an array of html elements
+    expect(getInstanceNames(actual)).toEqual(expect.arrayContaining(expected));
+  });
+
+  // returns a map of all the elements for each tagname
+  // should thow an error if any of the tagnames have the same id
+  // should return an array of objects for each of the elements
+});
 
 // 3.
 // accepts an array of dom (?) elements and returns a map
