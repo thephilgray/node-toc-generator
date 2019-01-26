@@ -41,24 +41,39 @@ describe('getFilePaths', () => {
 
 // 2.
 describe('getElementsFromFile', () => {
+  const getInstanceNames = HTMLElementsArray =>
+    HTMLElementsArray.map(el => el.constructor.name);
+
   // accepts a filename/filepath to an html file and an array of element tagnames
   it('accepts a filename/filepath to an html file and an array of element tagnames and returns an array of elements', async () => {
     const htmlFile = path.join(__dirname, 'fixtures', 'page002.html');
     const tagnames = ['h1', 'h2', 'h3'];
     const actual = await getElementsFromFile(htmlFile, tagnames);
 
-    const getInstanceNames = HTMLElementsArray =>
-      HTMLElementsArray.map(el => el.constructor.name);
     const expected = ['HTMLHeadingElement'];
     // should be an array of html elements
     expect(getInstanceNames(actual)).toEqual(expect.arrayContaining(expected));
   });
 
-  // returns a map of all the elements for each tagname
-  // should thow an error if any of the tagnames have the same id
-  // should return an array of objects for each of the elements
+  it('returns array of elements for all the targetd tags in the document', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', 'page002.html');
+    const tagnames = ['h1', 'h2', 'h3', 'h4', 'h5'];
+    const actual = await getElementsFromFile(htmlFile, tagnames);
+
+    const expected = [
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+    ];
+    // should be an array of html elements
+    expect(getInstanceNames(actual)).toEqual(expected);
+  });
 });
 
+// ? not necessary or can be moved to helper
+// returns a map of all the elements for each tagname
+// should thow an error if any of the tagnames have the same id
+// should return an array of objects for each of the elements
 // 3.
 // accepts an array of dom (?) elements and returns a map
 // the id of each element should be the key
