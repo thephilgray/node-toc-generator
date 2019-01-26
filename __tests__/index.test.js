@@ -26,6 +26,14 @@ describe('getFilePaths', () => {
     expect(expected).toEqual(actual);
   });
   // can also accept an array of extension names
+  it('accepts the extension name argument as an array of extension names', async () => {
+    const srcPath = path.join(__dirname, 'fixtures');
+    const extensionName = ['html', '.css'];
+    const expected = ['page001.html', 'page002.html', 'style.css'];
+    const actual = await getFilePaths(srcPath, extensionName);
+    expect(expected).toEqual(actual);
+  });
+
   // opts: can return a list of relative file paths or absolute, or just the filenames
 });
 
