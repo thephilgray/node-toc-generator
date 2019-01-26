@@ -2,7 +2,12 @@ const path = require('path');
 const getFilePaths = require('../lib/getFilePaths.js');
 const getElementsFromFile = require('../lib/getElementsFromFile.js');
 
-const testHTMLFilenames = ['page001.html', 'page002.html', 'page003.html'];
+const testHTMLFilenames = [
+  'page001.html',
+  'page002.html',
+  'page003.html',
+  'page004.html',
+];
 
 // 1.
 describe('getFilePaths', () => {
@@ -93,6 +98,34 @@ describe('getElementsFromFile', () => {
   it('accepts classnames in the selectors array', async () => {
     const htmlFile = path.join(__dirname, 'fixtures', testHTMLFilenames[1]);
     const actual = await getElementsFromFile(htmlFile, ['.h1', '.h2', '.h3']);
+
+    const expected = [
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+    ];
+
+    // should be an array of html elements
+    expect(getInstanceNames(actual)).toEqual(expected);
+  });
+
+  it('accepts an id prefix in the selectors array', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', testHTMLFilenames[3]);
+    const actual = await getElementsFromFile(htmlFile, ['#toc-']);
+
+    const expected = [
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+    ];
+
+    // should be an array of html elements
+    expect(getInstanceNames(actual)).toEqual(expected);
+  });
+
+  it('also accepts a string value in place of an array of selectors', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', testHTMLFilenames[3]);
+    const actual = await getElementsFromFile(htmlFile, '#toc-');
 
     const expected = [
       'HTMLHeadingElement',
