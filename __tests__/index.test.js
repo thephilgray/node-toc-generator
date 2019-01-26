@@ -35,6 +35,7 @@ describe('getFilePaths', () => {
   });
 
   // opts: can return a list of relative file paths or absolute, or just the filenames
+  // ? is this necessary? the user already supplied a directory and can derrive the absolute paths, or paths relative to cwd from that, or we can make a helper function for that
 });
 
 // 2.
