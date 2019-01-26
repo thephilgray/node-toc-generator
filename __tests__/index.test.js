@@ -78,6 +78,31 @@ describe('getElementsFromFile', () => {
     expect(actual[2].tagName).toEqual('H3');
     expect(actual[3].tagName).toEqual('H3');
   });
+
+  it('accepts other types elements and returns them in order of tagnames array', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', testHTMLFilenames[2]);
+    const actual = await getElementsFromFile(
+      htmlFile,
+      tagnames.concat(['main', 'article'])
+    );
+
+    // should be an array of html elements
+    expect(actual[5].tagName).toEqual('ARTICLE');
+  });
+
+  it('accepts classnames in the selectors array', async () => {
+    const htmlFile = path.join(__dirname, 'fixtures', testHTMLFilenames[1]);
+    const actual = await getElementsFromFile(htmlFile, ['.h1', '.h2', '.h3']);
+
+    const expected = [
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+      'HTMLHeadingElement',
+    ];
+
+    // should be an array of html elements
+    expect(getInstanceNames(actual)).toEqual(expected);
+  });
 });
 
 // ? not necessary or can be moved to helper
