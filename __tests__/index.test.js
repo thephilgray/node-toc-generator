@@ -9,7 +9,7 @@ const testHTMLFilenames = [
   'page001.html',
   'page002.html',
   'page003.html',
-  'page004.html'
+  'page004.html',
 ];
 
 const headingTagnames = ['h1', 'h2', 'h3', 'h4', 'h5'];
@@ -74,7 +74,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement'
+      'HTMLHeadingElement',
     ];
     // should be an array of html elements
     expect(getInstanceNames(actual)).toEqual(expected);
@@ -107,7 +107,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement'
+      'HTMLHeadingElement',
     ];
 
     // should be an array of html elements
@@ -121,7 +121,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement'
+      'HTMLHeadingElement',
     ];
 
     // should be an array of html elements
@@ -135,7 +135,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement'
+      'HTMLHeadingElement',
     ];
 
     // should be an array of html elements
@@ -181,7 +181,7 @@ describe('getSelectedElementsFromSelectedFiles', () => {
         id: el.id,
         fileID: i,
         page: testHTMLFilenames[i].split('.')[0],
-        level: headingTagnames.indexOf(el.tagName.toLowerCase()) + 1
+        level: headingTagnames.indexOf(el.tagName.toLowerCase()) + 1,
       }));
       return [...acc, ...mapped];
     }, []);
@@ -217,7 +217,7 @@ describe('getSelectedElementsFromSelectedFiles', () => {
         id: el.id,
         fileID: i,
         page: testHTMLFilenames[i].split('.')[0],
-        level: 1
+        level: 1,
       }));
       return [...acc, ...mapped];
     }, []);
@@ -243,7 +243,6 @@ describe('getTocData', () => {
   });
   test('should return the data sorted by fileID and then level', async () => {
     const data = await getTocData('__tests__/fixtures');
-    console.log(data);
     const mappedHeadingText = arr => arr.map(el => el.text);
     const actual = mappedHeadingText(data);
     const expected = [
@@ -259,7 +258,7 @@ describe('getTocData', () => {
       'SeventhHeading',
       'Heading 1',
       'Heading 2',
-      'Heading 3'
+      'Heading 3',
     ];
     expect(actual).toMatchObject(expected);
   });
