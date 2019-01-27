@@ -8,7 +8,7 @@ const testHTMLFilenames = [
   'page001.html',
   'page002.html',
   'page003.html',
-  'page004.html',
+  'page004.html'
 ];
 
 const headingTagnames = ['h1', 'h2', 'h3', 'h4', 'h5'];
@@ -54,7 +54,7 @@ describe('getFilePaths', () => {
 describe('getElementsFromFile', () => {
   const tagnames = headingTagnames;
   const getInstanceNames = HTMLElementsArray =>
-    HTMLElementsArray.map(el => el.constructor.name);
+    HTMLElementsArray.map(el => el.el.constructor.name);
 
   // accepts a filename/filepath to an html file and an array of element tagnames
   it('accepts a filename/filepath to an html file and an array of element tagnames and returns an array of elements', async () => {
@@ -73,7 +73,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement',
+      'HTMLHeadingElement'
     ];
     // should be an array of html elements
     expect(getInstanceNames(actual)).toEqual(expected);
@@ -84,8 +84,8 @@ describe('getElementsFromFile', () => {
     const actual = await getElementsFromFile(htmlFile, tagnames);
 
     // should be an array of html elements
-    expect(actual[2].tagName).toEqual('H3');
-    expect(actual[3].tagName).toEqual('H3');
+    expect(actual[2].el.tagName).toEqual('H3');
+    expect(actual[3].el.tagName).toEqual('H3');
   });
 
   it('accepts other types elements and returns them in order of tagnames array', async () => {
@@ -96,7 +96,7 @@ describe('getElementsFromFile', () => {
     );
 
     // should be an array of html elements
-    expect(actual[5].tagName).toEqual('ARTICLE');
+    expect(actual[5].el.tagName).toEqual('ARTICLE');
   });
 
   it('accepts classnames in the selectors array', async () => {
@@ -106,7 +106,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement',
+      'HTMLHeadingElement'
     ];
 
     // should be an array of html elements
@@ -120,7 +120,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement',
+      'HTMLHeadingElement'
     ];
 
     // should be an array of html elements
@@ -134,7 +134,7 @@ describe('getElementsFromFile', () => {
     const expected = [
       'HTMLHeadingElement',
       'HTMLHeadingElement',
-      'HTMLHeadingElement',
+      'HTMLHeadingElement'
     ];
 
     // should be an array of html elements
@@ -148,8 +148,12 @@ describe('getElementsFromFile', () => {
 // should return an array of objects for each of the elements
 
 describe('getSelectedElementsFromSelectedFiles', () => {
+  const { JSDOM } = jsdom;
+  const filePaths = testHTMLFilenames.map(p =>
+    path.join(__dirname, 'fixtures', p)
+  );
+
   it('returns a flat array of all selected elements from all selected files', async () => {
-    const { JSDOM } = jsdom;
     const dom1 = new JSDOM(`<h1 id="firstHeading">First Heading</h1>
       <h2 id="secondHeading">Second Heading</h2>
       <h2 id="thirdheading">Third Heading</h2>`);
@@ -168,10 +172,6 @@ describe('getSelectedElementsFromSelectedFiles', () => {
 
     const allFiles = [dom1, dom2, dom3, dom4];
 
-    const filePaths = testHTMLFilenames.map(p =>
-      path.join(__dirname, 'fixtures', p)
-    );
-
     const expected = allFiles.reduce((acc, dom, i) => {
       const page = [...dom.window.document.body.children];
       const mapped = page.map(el => ({
@@ -179,7 +179,8 @@ describe('getSelectedElementsFromSelectedFiles', () => {
         text: el.textContent,
         id: el.id,
         fileID: i,
-        page: path.basename(filePaths[i]).split('.')[0],
+        page: testHTMLFilenames[i].split('.')[0],
+        level: headingTagnames.indexOf(el.tagName.toLowerCase()) + 1
       }));
       return [...acc, ...mapped];
     }, []);
@@ -191,9 +192,43 @@ describe('getSelectedElementsFromSelectedFiles', () => {
 
     expect(actual).toContainEqual(...expected);
   });
+  it('still works if the selectors array is a string', async () => {
+    const dom1 = new JSDOM(`
+      <h2 id="secondHeading">Second Heading</h2>
+      <h2 id="thirdheading">Third Heading</h2>`);
+
+    const dom2 = new JSDOM(`
+      <h2 id="fifthHeading" class="h2">Fifth Heading</h2>
+      `);
+
+    const dom3 = new JSDOM(`
+          <h2 id="fifthHeading">Fifth Heading</h2>`);
+    const dom4 = new JSDOM(`<h2 id="toc-2">Heading 2</h2>
+          <h2 id="toc-3">Heading 3</h2>`);
+
+    const allFiles = [dom1, dom2, dom3, dom4];
+
+    const expected = allFiles.reduce((acc, dom, i) => {
+      const page = [...dom.window.document.body.children];
+      const mapped = page.map(el => ({
+        el,
+        text: el.textContent,
+        id: el.id,
+        fileID: i,
+        page: testHTMLFilenames[i].split('.')[0],
+        level: 1
+      }));
+      return [...acc, ...mapped];
+    }, []);
+
+    const actual = await getSelectedElementsFromSelectedFiles(filePaths, 'h2');
+
+    expect(actual).toMatchObject(expected);
+  });
 });
 
 // 3.
+// ? probably not necessary, better to work with arrays in this case; preventing duplicate IDs is on the user
 // accepts an array of dom (?) elements and returns a map
 // the id of each element should be the key
 // should throw an error if it encounters duplicate IDs
