@@ -3,6 +3,7 @@ const jsdom = require('jsdom');
 const getFilePaths = require('../lib/getFilePaths.js');
 const getElementsFromFile = require('../lib/getElementsFromFile.js');
 const getSelectedElementsFromSelectedFiles = require('../lib/getSelectedElementsFromSelectedFiles.js');
+const getTocData = require('../index');
 
 const testHTMLFilenames = [
   'page001.html',
@@ -233,5 +234,35 @@ describe('getSelectedElementsFromSelectedFiles', () => {
 // the id of each element should be the key
 // should throw an error if it encounters duplicate IDs
 
-// 4.
-// accepts multiple arrays
+// 4. test implementation
+
+describe('getTocData', () => {
+  test('should return the flattened array with objects for each element', async () => {
+    const actual = await getTocData('__tests__/fixtures');
+    expect(actual).toHaveLength(13);
+  });
+  test('should return the data sorted by fileID and then level', async () => {
+    const data = await getTocData('__tests__/fixtures');
+    console.log(data);
+    const mappedHeadingText = arr => arr.map(el => el.text);
+    const actual = mappedHeadingText(data);
+    const expected = [
+      'First Heading',
+      'Second Heading',
+      'Third Heading',
+      'Fourth Heading',
+      'Fifth Heading',
+      'Sixth Heading',
+      'Fourth Heading',
+      'Fifth Heading',
+      'Sixth Heading',
+      'SeventhHeading',
+      'Heading 1',
+      'Heading 2',
+      'Heading 3'
+    ];
+    expect(actual).toMatchObject(expected);
+  });
+});
+
+// TODO: include an actual template generator function for CLI usage, but export getTocData and templateGen separately
