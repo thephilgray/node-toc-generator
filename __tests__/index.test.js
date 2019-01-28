@@ -6,7 +6,10 @@ const getFilePaths = require('../lib/getFilePaths.js');
 const getElementsFromFile = require('../lib/getElementsFromFile.js');
 const getDocumentFromFilePathOrHtmlString = require('../lib/getDocumentFromFilePathOrHtmlString.js');
 const getSelectedElementsFromSelectedFiles = require('../lib/getSelectedElementsFromSelectedFiles.js');
-const getTocData = require('../index');
+const {
+  getTocDataFromDir,
+  getTocDataFromArrayOfHtmlPathsOrStrings,
+} = require('../index');
 
 const testHTMLFilenames = [
   'page001.html',
@@ -259,13 +262,13 @@ describe('getDocumentFromFilePathOrHtmlString', () => {
 
 // 4. test implementation
 
-describe('getTocData', () => {
+describe('getTocDataFromDir', () => {
   test('should return the flattened array with objects for each element', async () => {
-    const actual = await getTocData('__tests__/fixtures');
+    const actual = await getTocDataFromDir('__tests__/fixtures');
     expect(actual).toHaveLength(13);
   });
   test('should return the data sorted by fileID and then level', async () => {
-    const data = await getTocData('__tests__/fixtures');
+    const data = await getTocDataFromDir('__tests__/fixtures');
     const mappedHeadingText = arr => arr.map(el => el.text);
     const actual = mappedHeadingText(data);
     const expected = [
@@ -287,4 +290,19 @@ describe('getTocData', () => {
   });
 });
 
-// TODO: include an actual template generator function for CLI usage, but export getTocData and templateGen separately
+describe('getTocDataFromArrayOfHtmlPathsOrStrings', () => {
+  const filePath = path.join(__dirname, 'fixtures', testHTMLFilenames[0]);
+  test('should return data from an array of html strings', async () => {
+    const readFile = promisify(fs.readFile);
+    const buffer = await readFile(filePath, 'UTF-8');
+    const htmlArray = [buffer.toString()];
+    const mappedHeadingText = arr => arr.map(el => el.text);
+    const expected = ['First Heading', 'Second Heading', 'Third Heading'];
+    const actualData = await getTocDataFromArrayOfHtmlPathsOrStrings(htmlArray);
+    const actual = mappedHeadingText(actualData);
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+// TODO: include an actual template generator function for CLI usage, but export getTocDataFromDir and templateGen separately
