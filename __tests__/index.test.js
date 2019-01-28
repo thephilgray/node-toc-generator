@@ -1,9 +1,15 @@
 const path = require('path');
+const fs = require('fs');
+const { promisify } = require('util');
 const jsdom = require('jsdom');
 const getFilePaths = require('../lib/getFilePaths.js');
 const getElementsFromFile = require('../lib/getElementsFromFile.js');
+const getDocumentFromFilePathOrHtmlString = require('../lib/getDocumentFromFilePathOrHtmlString.js');
 const getSelectedElementsFromSelectedFiles = require('../lib/getSelectedElementsFromSelectedFiles.js');
-const getTocData = require('../index');
+const {
+  getTocDataFromDir,
+  getTocDataFromArrayOfHtmlPathsOrStrings,
+} = require('../index');
 
 const testHTMLFilenames = [
   'page001.html',
@@ -229,20 +235,40 @@ describe('getSelectedElementsFromSelectedFiles', () => {
 });
 
 // 3.
-// ? probably not necessary, better to work with arrays in this case; preventing duplicate IDs is on the user
-// accepts an array of dom (?) elements and returns a map
-// the id of each element should be the key
-// should throw an error if it encounters duplicate IDs
+
+// accepts either a path to an html file or a string of html and returns a jsom document
+
+describe('getDocumentFromFilePathOrHtmlString', () => {
+  const { JSDOM } = jsdom;
+  const filePath = path.join(__dirname, 'fixtures', testHTMLFilenames[0]);
+
+  test('should accept a path to an html file and return a jsdom document', async () => {
+    const dom = await JSDOM.fromFile(filePath);
+    const expected = dom.window.document;
+    const actual = await getDocumentFromFilePathOrHtmlString(filePath);
+    expect(actual).toEqual(expected);
+  });
+
+  test('should accept a string of html and return a jsdom document', async () => {
+    const dom = await JSDOM.fromFile(filePath);
+    const expected = dom.window.document;
+    const readFile = promisify(fs.readFile);
+    const buffer = await readFile(filePath, 'UTF-8');
+    const htmlString = buffer.toString();
+    const actual = await getDocumentFromFilePathOrHtmlString(htmlString);
+    expect(actual).toEqual(expected);
+  });
+});
 
 // 4. test implementation
 
-describe('getTocData', () => {
+describe('getTocDataFromDir', () => {
   test('should return the flattened array with objects for each element', async () => {
-    const actual = await getTocData('__tests__/fixtures');
+    const actual = await getTocDataFromDir('__tests__/fixtures');
     expect(actual).toHaveLength(13);
   });
   test('should return the data sorted by fileID and then level', async () => {
-    const data = await getTocData('__tests__/fixtures');
+    const data = await getTocDataFromDir('__tests__/fixtures');
     const mappedHeadingText = arr => arr.map(el => el.text);
     const actual = mappedHeadingText(data);
     const expected = [
@@ -264,4 +290,19 @@ describe('getTocData', () => {
   });
 });
 
-// TODO: include an actual template generator function for CLI usage, but export getTocData and templateGen separately
+describe('getTocDataFromArrayOfHtmlPathsOrStrings', () => {
+  const filePath = path.join(__dirname, 'fixtures', testHTMLFilenames[0]);
+  test('should return data from an array of html strings', async () => {
+    const readFile = promisify(fs.readFile);
+    const buffer = await readFile(filePath, 'UTF-8');
+    const htmlArray = [buffer.toString()];
+    const mappedHeadingText = arr => arr.map(el => el.text);
+    const expected = ['First Heading', 'Second Heading', 'Third Heading'];
+    const actualData = await getTocDataFromArrayOfHtmlPathsOrStrings(htmlArray);
+    const actual = mappedHeadingText(actualData);
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+// TODO: include an actual template generator function for CLI usage, but export getTocDataFromDir and templateGen separately

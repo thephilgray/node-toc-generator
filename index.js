@@ -6,7 +6,7 @@ const defaultProps = {
   extensions: ['html'],
   headings: ['h1', 'h2', 'h3', 'h4', 'h5'],
 };
-module.exports = async (
+const getTocDataFromDir = async (
   pagesDir,
   extensions = defaultProps.extensions,
   headings = defaultProps.headings
@@ -27,3 +27,21 @@ module.exports = async (
     throw new Error(e);
   }
 };
+
+const getTocDataFromArrayOfHtmlPathsOrStrings = async (
+  arr,
+  levels = defaultProps.headings.length
+) => {
+  const selectedHeadings = defaultProps.headings.slice(0, levels);
+  try {
+    const data = await getSelectedElementsFromSelectedFiles(
+      arr,
+      selectedHeadings
+    );
+    return data;
+  } catch (e) {
+    throw new Error(e);
+  }
+};
+
+module.exports = { getTocDataFromDir, getTocDataFromArrayOfHtmlPathsOrStrings };
