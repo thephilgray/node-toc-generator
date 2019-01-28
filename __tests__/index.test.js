@@ -1,7 +1,10 @@
 const path = require('path');
+const fs = require('fs');
+const { promisify } = require('util');
 const jsdom = require('jsdom');
 const getFilePaths = require('../lib/getFilePaths.js');
 const getElementsFromFile = require('../lib/getElementsFromFile.js');
+const getDocumentFromFilePathOrHtmlString = require('../lib/getDocumentFromFilePathOrHtmlString.js');
 const getSelectedElementsFromSelectedFiles = require('../lib/getSelectedElementsFromSelectedFiles.js');
 const getTocData = require('../index');
 
@@ -229,10 +232,30 @@ describe('getSelectedElementsFromSelectedFiles', () => {
 });
 
 // 3.
-// ? probably not necessary, better to work with arrays in this case; preventing duplicate IDs is on the user
-// accepts an array of dom (?) elements and returns a map
-// the id of each element should be the key
-// should throw an error if it encounters duplicate IDs
+
+// accepts either a path to an html file or a string of html and returns a jsom document
+
+describe('getDocumentFromFilePathOrHtmlString', () => {
+  const { JSDOM } = jsdom;
+  const filePath = path.join(__dirname, 'fixtures', testHTMLFilenames[0]);
+
+  test('should accept a path to an html file and return a jsdom document', async () => {
+    const dom = await JSDOM.fromFile(filePath);
+    const expected = dom.window.document;
+    const actual = await getDocumentFromFilePathOrHtmlString(filePath);
+    expect(actual).toEqual(expected);
+  });
+
+  test('should accept a string of html and return a jsdom document', async () => {
+    const dom = await JSDOM.fromFile(filePath);
+    const expected = dom.window.document;
+    const readFile = promisify(fs.readFile);
+    const buffer = await readFile(filePath, 'UTF-8');
+    const htmlString = buffer.toString();
+    const actual = await getDocumentFromFilePathOrHtmlString(htmlString);
+    expect(actual).toEqual(expected);
+  });
+});
 
 // 4. test implementation
 
